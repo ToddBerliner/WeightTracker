@@ -25,6 +25,10 @@ import ReactDOM from "react-dom";
 
 // TODO: autoprefixer, create react app (CRA)
 
+const styles = {
+  appWrap: {},
+};
+
 export default class WeightTracker extends Component {
   constructor(props) {
     super(props);
@@ -117,7 +121,7 @@ export default class WeightTracker extends Component {
         {dateKeys.map(key => {
           console.log(key, days[key]);
           return (
-            <div key>
+            <div key={key}>
               {key} => Weight: {days[key].weight}, Body Fat:{" "}
               {days[key].body_fat}%
             </div>
