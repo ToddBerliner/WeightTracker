@@ -103,9 +103,6 @@ export function getDayIdsBetweenDayIds(firstDayId, secondDayId) {
     secondDayId = parseInt(secondDayId, 10);
   }
 
-  console.log("in days between");
-  console.log(firstDayId, secondDayId);
-
   const dayIds = [];
   const firstDate = new Date(parseInt(firstDayId, 10));
   let dateToAdd = addDays(firstDate);

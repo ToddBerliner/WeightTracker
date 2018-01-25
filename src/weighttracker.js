@@ -22,7 +22,14 @@ Display
 */
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import { getDateKey, getDayIdsBetweenDayIds } from "./calendarDb";
+import {
+  getDateKey,
+  getDayIdsBetweenDayIds,
+  getFriendlyDate,
+  getDateFromKey,
+} from "./calendarDb";
+
+import "./styles.css";
 
 // TODO: autoprefixer, create react app (CRA)
 
@@ -46,6 +53,7 @@ export default class WeightTracker extends Component {
     this.handleInput = this.handleInput.bind(this);
     this.clearState = this.clearState.bind(this);
     this.addData = this.addData.bind(this);
+    this.renderData = this.renderData.bind(this);
   }
 
   handleInput() {
@@ -67,7 +75,7 @@ export default class WeightTracker extends Component {
         // check for gaps and fill in w/ empty days (abstract to DB class)
         const lastDateKey = newDateKeys[newDateKeys.length - 1];
         const dateKeysToFill = getDayIdsBetweenDayIds(lastDateKey, dateKey);
-        if (dateKeysToFill.length > 0) {
+        if (dateKeysToFill && dateKeysToFill.length > 0) {
           dateKeysToFill.forEach(dateKey => {
             newDays[dateKey] = {
               date_time: new Date(parseInt(dateKey, 10)),
@@ -109,11 +117,24 @@ export default class WeightTracker extends Component {
     }
   }
 
-  renderRow(dateKey, idx) {
-    return <div>{dateKey}</div>;
+  renderRow(dateKey, day) {
+    return (
+      <div key={dateKey}>
+        {getFriendlyDate(dateKey)}
+        -- Weight: {day.weight || "--"}lbs. -- Body Fat: {day.body_fat || "--"}%
+      </div>
+    );
   }
 
-  renderWeekRow(data) {}
+  renderWeekRow(dateKey, data) {
+    return (
+      <div key={dateKey} style={styles.weekRow}>
+        [{data.dows.join(",")}] - Avg. Weight: {data.average_weight}lbs. ({data.weight_delta ||
+          "--"}lbs.) - Avg. Body Fat: {data.average_body_fat}% ({data.body_fat_delta ||
+          "--"}%)
+      </div>
+    );
+  }
 
   renderData() {
     const { days, dateKeys } = this.state;
@@ -121,58 +142,56 @@ export default class WeightTracker extends Component {
       return <div style={{ margin: 5, color: "red" }}>No Data Yet</div>;
     }
 
-    const allKeys = [...dateKeys];
-    const weeks = [];
+    let counters = { dows: [], weight: 0, body_fat: 0 };
+    let lastWeight, lastBodyFat;
+    const rows = [];
+    dateKeys.forEach((dateKey, idx, arr) => {
+      const dow = getDateFromKey(dateKey).getDay();
+      const day = days[dateKey];
+      // add the day row
+      rows.push(this.renderRow(dateKey, day));
+      // update the counters
+      if (day.weight) {
+        counters.dows.push(dow);
+        counters.weight = parseFloat(
+          (counters.weight + parseFloat(day.weight)).toFixed(1),
+        );
+      }
+      if (day.body_fat) {
+        counters.body_fat = parseFloat(
+          (counters.body_fat + parseFloat(day.body_fat)).toFixed(1),
+        );
+      }
+      // write the day row
+      if (dow === 6 || idx === arr.length - 1) {
+        const rowData = {
+          dows: counters.dows,
+          average_weight: parseFloat(
+            counters.weight / counters.dows.length,
+          ).toFixed(1),
+          average_body_fat: parseFloat(
+            counters.body_fat / counters.dows.length,
+          ).toFixed(1),
+        };
+        if (lastWeight) {
+          rowData.weight_delta = parseFloat(
+            rowData.average_weight - lastWeight,
+          ).toFixed(1);
+        }
+        if (lastBodyFat) {
+          rowData.body_fat_delta = parseFloat(
+            rowData.average_body_fat - lastBodyFat,
+          ).toFixed(1);
+        }
+        rows.push(this.renderWeekRow(`w${dateKey}`, rowData));
+        lastWeight = rowData.average_weight;
+        lastBodyFat = rowData.average_body_fat;
+        counters = { dows: [], weight: 0, body_fat: 0 };
+      }
+    });
 
-    // datekeys are ASC
-    while (allKeys.length > 0) {
-      weeks.push(allKeys.splice(0, 7));
-    }
-
-    console.log(weeks);
-
-    return [];
-
-    // loop days, new week every 7th
-    // while (allKeys.length > 0) {
-    //   const prevWeek = { ...weekRow };
-    //
-    //   // splice off week
-    //   weekKeys = allKeys.splice(-7);
-    //
-    //   // set week data
-    //   weekRow.days = weekKeys.length;
-    //   weekRow.total_weight = 0;
-    //   weekRow.total_body_fat = 0;
-    //   weekRow.date = weekKeys[weekKeys.length - 1];
-    //   for (let weekKey of weekKeys) {
-    //     const day = days[weekKey];
-    //     weekRow.total_weight = parseFloat(
-    //       (weekRow.total_weight + parseFloat(day.weight)).toFixed(1),
-    //     );
-    //     weekRow.total_body_fat = parseFloat(
-    //       (weekRow.total_body_fat + parseFloat(day.body_fat)).toFixed(1),
-    //     );
-    //   }
-    //   weekRow.average_weight = parseFloat(
-    //     weekRow.total_weight / weekRow.days,
-    //   ).toFixed(1);
-    //   weekRow.average_body_fat = parseFloat(
-    //     weekRow.total_body_fat / weekRow.days,
-    //   ).toFixed(1);
-    //
-    //   if (prevWeek.average_weight) {
-    //     console.log(prevWeek.average_weight, weekRow.average_weight);
-    //   }
-    //
-    //   weekRow.weight_delta =
-    //     prevWeek.average_weight - weekRow.average_weight || "fo";
-    //   weekRow.body_fat_delta =
-    //     prevWeek.average_body_fat - weekRow.average_body_fat || "fo";
-    //   // push row
-    //   rows.push(this.renderRow(weekRow));
-    // }
-    // return rows;
+    rows.reverse();
+    return rows;
   }
 
   addData() {
@@ -218,9 +237,11 @@ export default class WeightTracker extends Component {
     */
     const { days, dateKeys } = this.state;
     return (
-      <div style={styles.appWrap}>
-        <div style={styles.titleRowWrap}>{new Date().toString()}</div>
-        <div style={styles.inputRowWrap}>
+      <div className="wtWrap">
+        <div className="wtTitle" style={styles.titleRowWrap}>
+          {new Date().toString()}
+        </div>
+        <div className="wtInput" style={styles.inputRowWrap}>
           <div style={styles.inputWrap}>
             <div style={styles.inputTitle}>Weight</div>
             <input
@@ -243,8 +264,10 @@ export default class WeightTracker extends Component {
             +
           </button>
         </div>
-        {this.renderData()}
-        <div style={{ marginTop: 10 }}>
+        <div className="wtData" ref="wtData">
+          {this.renderData()}
+        </div>
+        <div className="wtFooter" style={{ marginTop: 10 }}>
           <button onClick={this.clearState}>Clear State</button>
           <button onClick={this.addData}>Add Data</button>
         </div>
