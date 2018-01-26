@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const paths = {
   DIST: path.resolve(__dirname, "dist"),
@@ -28,7 +29,19 @@ const config = {
       },
       {
         test: /\.css$/,
-        use: [{ loader: "style-loader" }, { loader: "css-loader" }],
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: ["css-loader"],
+        }),
+      },
+      {
+        test: /\.(png|jp(e*)g|svg)$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: { chunks: "all" },
+          },
+        ],
       },
     ],
   },
@@ -51,6 +64,9 @@ const config = {
         yandex: false,
         windows: false,
       },
+    }),
+    new ExtractTextPlugin({
+      filename: "[name].css",
     }),
   ],
 };
