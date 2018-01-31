@@ -18,6 +18,8 @@ const config = {
   },
   devServer: {
     contentBase: paths.SRC,
+    host: "0.0.0.0",
+    port: 8080,
   },
   devtool: "eval-source-map",
   module: {
@@ -47,15 +49,15 @@ const config = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "WeightTracker: The App",
+      title: "WT",
       template: path.join(paths.SRC, "index.html"),
     }),
     new FaviconsWebpackPlugin({
       logo: path.join(paths.ART, "wticon.png"),
       icons: {
         android: false,
-        appleIcon: false,
-        appleStartup: false,
+        appleIcon: true,
+        appleStartup: true,
         coast: false,
         favicons: true,
         firefox: false,

@@ -48,6 +48,8 @@ export default class WeightTracker extends Component {
     this.emptyState = {
       days: {},
       dateKeys: [],
+      weight: 0,
+      bodyfat: 0,
     };
     this.state = state || this.emptyState;
 
@@ -57,22 +59,26 @@ export default class WeightTracker extends Component {
     this.clearState = this.clearState.bind(this);
     this.addData = this.addData.bind(this);
     this.renderData = this.renderData.bind(this);
+    this.onInputChange = this.onInputChange.bind(this);
+  }
+
+  onInputChange(event) {
+    const { value, name } = event.target;
+    this.setState(state => {
+      return { ...state, [name]: value };
+    });
   }
 
   handleInput() {
-    console.log("foo");
-
     const dateTime = new Date();
     const dateKey = getDateKey(dateTime);
 
     // get values
     const newDay = {
       date_time: dateTime,
-      weight: parseFloat(this.inputWeight.value),
-      body_fat: parseFloat(this.inputBodyFat.value),
+      weight: this.state.weight,
+      body_fat: this.state.bodyfat,
     };
-
-    console.log(newDay);
 
     // update state
     this.setState(
@@ -268,10 +274,12 @@ export default class WeightTracker extends Component {
         } else {
           rowData.body_fat_delta = null;
         }
-        console.log(rowData);
+        // push the new row in
         rows.push(this.renderWeekRow(`w${dateKey}`, rowData));
+        // update the stats for subsequent comparrison
         lastWeight = rowData.average_weight;
         lastBodyFat = rowData.average_body_fat;
+        // reset the counters for the week
         counters = { dows: [], weight: 0, body_fat: 0 };
       }
     });
@@ -292,7 +300,7 @@ export default class WeightTracker extends Component {
     dateKey -> dayId 0-6 -> group into weeks
     -> per week, get averages of w + bf, calc changes since prev week
     */
-    const { days, dateKeys } = this.state;
+    const { days, dateKeys, weight, bodyfat } = this.state;
     return (
       /* structure should be here */
       <div className="wtWrap">
@@ -301,10 +309,28 @@ export default class WeightTracker extends Component {
         </div>
         <div className="wtInputRow">
           <div className="wtInputsOuterWrap">
-            <WtInputsInner
-              weightRef={innerRef => (this.inputWeight = innerRef)}
-              bodyFatRef={innerRef => (this.inputBodyFat = innerRef)}
-            />
+            <div className="wtInputsInnerWrap">
+              <div className="wtInputs">
+                <div className="wtInputWrap">
+                  <WtInputItem
+                    title="Weight"
+                    type="weight"
+                    units="LBS."
+                    value={weight}
+                    name="weight"
+                    onInputChange={this.onInputChange}
+                  />
+                  <WtInputItem
+                    title="Body Fat"
+                    type="bodyfat"
+                    units="%."
+                    value={bodyfat}
+                    name="bodyfat"
+                    onInputChange={this.onInputChange}
+                  />
+                </div>
+              </div>
+            </div>
             <button
               className="wtInputButton"
               type="button"
@@ -353,30 +379,6 @@ const WtTitle = props => {
   );
 };
 
-const WtInputsInner = props => {
-  return (
-    <div className="wtInputsInnerWrap">
-      <div className="wtInputs">
-        <div className="wtInputWrap">
-          <WtInputItem
-            title="Weight"
-            type="weight"
-            units="LBS."
-            innerRef={props.weightRef}
-            value="186.8"
-          />
-          <WtInputItem
-            title="Body Fat"
-            type="bodyfat"
-            units="%."
-            innerRef={props.bodyFatRef}
-            value="18.3"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
 const WtInputItem = props => {
   return (
     <div className={`wtInputItem ${props.type}`}>
@@ -387,9 +389,8 @@ const WtInputItem = props => {
           type="number"
           ref={props.innerRef}
           value={props.value}
-          onChange={() => {
-            console.log(this);
-          }}
+          onChange={props.onInputChange}
+          name={props.name}
         />
         <div className="wtInputUnits">{props.units}</div>
       </div>
