@@ -26,10 +26,13 @@ import {
   getDateKey,
   getDayIdsBetweenDayIds,
   getFriendlyDate,
+  getFriendlyTime,
   getDateFromKey,
+  getMinMonDay,
 } from "./calendarDb";
 
 import "./styles.css";
+import chart from "../art/chart.png";
 
 // TODO: autoprefixer, create react app (CRA)
 
@@ -57,6 +60,8 @@ export default class WeightTracker extends Component {
   }
 
   handleInput() {
+    console.log("foo");
+
     const dateTime = new Date();
     const dateKey = getDateKey(dateTime);
 
@@ -66,6 +71,9 @@ export default class WeightTracker extends Component {
       weight: parseFloat(this.inputWeight.value),
       body_fat: parseFloat(this.inputBodyFat.value),
     };
+
+    console.log(newDay);
+
     // update state
     this.setState(
       state => {
@@ -117,9 +125,38 @@ export default class WeightTracker extends Component {
     }
   }
 
+  addData() {
+    let weight = 165.5;
+    let body_fat = 19;
+    const state = { days: {}, dateKeys: [] };
+    for (let i = 1; i < 15; i++) {
+      const dateKey = getDateKey(new Date(2018, 0, i));
+      const day = {
+        date_time: new Date(2018, 0, i),
+        weight,
+        body_fat,
+      };
+      weight = parseFloat((weight + 0.1).toFixed(1));
+      body_fat = parseFloat((body_fat + 0.1).toFixed(1));
+      state.days[dateKey] = day;
+      state.dateKeys.push(dateKey);
+    }
+    this.setState(
+      state, // setState callback
+      () => {
+        // save state
+        try {
+          localStorage.setItem("state", JSON.stringify(this.state));
+        } catch (err) {
+          console.log(`Storage failed: ${err}`);
+        }
+      },
+    );
+  }
+
   renderRow(dateKey, day) {
     return (
-      <div key={dateKey}>
+      <div key={dateKey} className="wtDayRow">
         {getFriendlyDate(dateKey)}
         -- Weight: {day.weight || "--"}lbs. -- Body Fat: {day.body_fat || "--"}%
       </div>
@@ -127,11 +164,53 @@ export default class WeightTracker extends Component {
   }
 
   renderWeekRow(dateKey, data) {
+    const { month, date } = getMinMonDay(dateKey.replace("w", ""), true);
+    const {
+      average_weight,
+      average_body_fat,
+      weight_delta,
+      body_fat_delta,
+    } = data;
+    let weight_delta_class = "",
+      body_fat_delta_class = "";
+    if (weight_delta > 0) {
+      weight_delta_class = "wtUp";
+    }
+    if (weight_delta < 0) {
+      weight_delta_class = "wtDown";
+    }
+    if (body_fat_delta > 0) {
+      body_fat_delta_class = "wtUp";
+    }
+    if (body_fat_delta < 0) {
+      body_fat_delta_class = "wtDown";
+    }
     return (
-      <div key={dateKey} style={styles.weekRow}>
-        [{data.dows.join(",")}] - Avg. Weight: {data.average_weight}lbs. ({data.weight_delta ||
-          "--"}lbs.) - Avg. Body Fat: {data.average_body_fat}% ({data.body_fat_delta ||
-          "--"}%)
+      <div key={dateKey} className="wtWeekRow">
+        <div className="wtRowDate">
+          {month}
+          <div className="wtRowDateDate">{date}</div>
+        </div>
+        <div className="wtRowData weight">
+          {average_weight || <div className="noData data">No data</div>}
+        </div>
+        <div className={`wtRowChange ${weight_delta_class}`}>
+          {weight_delta ? (
+            Math.abs(weight_delta)
+          ) : (
+            <div className="noData change">No data</div>
+          )}
+        </div>
+        <div className="wtRowData bodyfat">
+          {average_body_fat || <div className="noData data">No data</div>}
+        </div>
+        <div className={`wtRowChange ${body_fat_delta_class}`}>
+          {body_fat_delta ? (
+            Math.abs(body_fat_delta)
+          ) : (
+            <div className="noData change">No data</div>
+          )}
+        </div>
       </div>
     );
   }
@@ -162,27 +241,34 @@ export default class WeightTracker extends Component {
           (counters.body_fat + parseFloat(day.body_fat)).toFixed(1),
         );
       }
-      // write the day row
+      // write the week row
       if (dow === 6 || idx === arr.length - 1) {
         const rowData = {
           dows: counters.dows,
-          average_weight: parseFloat(
-            counters.weight / counters.dows.length,
-          ).toFixed(1),
-          average_body_fat: parseFloat(
-            counters.body_fat / counters.dows.length,
-          ).toFixed(1),
+          average_weight:
+            counters.dows.length > 0
+              ? parseFloat(counters.weight / counters.dows.length).toFixed(1)
+              : null,
+          average_body_fat:
+            counters.dows.length > 0
+              ? parseFloat(counters.body_fat / counters.dows.length).toFixed(1)
+              : null,
         };
-        if (lastWeight) {
+        if (lastWeight && rowData.average_weight) {
           rowData.weight_delta = parseFloat(
             rowData.average_weight - lastWeight,
           ).toFixed(1);
+        } else {
+          rowData.weight_delta = null;
         }
-        if (lastBodyFat) {
+        if (lastBodyFat && rowData.average_body_fat) {
           rowData.body_fat_delta = parseFloat(
             rowData.average_body_fat - lastBodyFat,
           ).toFixed(1);
+        } else {
+          rowData.body_fat_delta = null;
         }
+        console.log(rowData);
         rows.push(this.renderWeekRow(`w${dateKey}`, rowData));
         lastWeight = rowData.average_weight;
         lastBodyFat = rowData.average_body_fat;
@@ -192,35 +278,6 @@ export default class WeightTracker extends Component {
 
     rows.reverse();
     return rows;
-  }
-
-  addData() {
-    let weight = 165.5;
-    let body_fat = 19;
-    const state = { days: {}, dateKeys: [] };
-    for (let i = 1; i < 15; i++) {
-      const dateKey = getDateKey(new Date(2018, 0, i));
-      const day = {
-        date_time: new Date(2018, 0, i),
-        weight,
-        body_fat,
-      };
-      weight = parseFloat((weight + 0.1).toFixed(1));
-      body_fat = parseFloat((body_fat + 0.1).toFixed(1));
-      state.days[dateKey] = day;
-      state.dateKeys.push(dateKey);
-    }
-    this.setState(
-      state, // setState callback
-      () => {
-        // save state
-        try {
-          localStorage.setItem("state", JSON.stringify(this.state));
-        } catch (err) {
-          console.log(`Storage failed: ${err}`);
-        }
-      },
-    );
   }
 
   render() {
@@ -237,35 +294,43 @@ export default class WeightTracker extends Component {
     */
     const { days, dateKeys } = this.state;
     return (
+      /* structure should be here */
       <div className="wtWrap">
-        <div className="wtTitle" style={styles.titleRowWrap}>
-          {new Date().toString()}
+        <div className="wtTitleRow">
+          <WtTitle />
         </div>
-        <div className="wtInput" style={styles.inputRowWrap}>
-          <div style={styles.inputWrap}>
-            <div style={styles.inputTitle}>Weight</div>
-            <input
-              style={styles.input}
-              type="number"
-              ref={node => (this.inputWeight = node)}
+        <div className="wtInputRow">
+          <div className="wtInputsOuterWrap">
+            <WtInputsInner
+              weightRef={innerRef => (this.inputWeight = innerRef)}
+              bodyFatRef={innerRef => (this.inputBodyFat = innerRef)}
             />
-            <label style={styles.inputLabel}>lbs.</label>
+            <button
+              className="wtInputButton"
+              type="button"
+              onClick={this.handleInput}
+            >
+              +
+            </button>
           </div>
-          <div style={styles.inputWrap}>
-            <div style={styles.inputTitle}>Body Fat</div>
-            <input
-              style={styles.input}
-              type="number"
-              ref={node => (this.inputBodyFat = node)}
-            />
-            <label style={styles.inputLabel}>%</label>
-          </div>
-          <button type="button" onClick={this.handleInput}>
-            +
-          </button>
         </div>
-        <div className="wtData" ref="wtData">
-          {this.renderData()}
+        <div className="wtDataRow" ref="wtData">
+          <div className="wtDataHeader">
+            <WtDataHeaderLabel
+              label="Avg. Weight"
+              units="LBS."
+              className="wtHeaderLabel weight"
+            />
+            <WtDataHeaderLabel
+              label="Avg. Body Fat"
+              units="%"
+              className="wtHeaderLabel bodyfat"
+            />
+          </div>
+          <div className="wtDataBody">{this.renderData()}</div>
+          <div className="wtDataChart">
+            <img src={chart} />
+          </div>
         </div>
         <div className="wtFooter" style={{ marginTop: 10 }}>
           <button onClick={this.clearState}>Clear State</button>
@@ -273,14 +338,71 @@ export default class WeightTracker extends Component {
         </div>
       </div>
     );
-    /*
-      <div className="appWrap">
-        <InputRow />
-        <ResultsGrid />
-      </div>
-    */
   }
 }
+
+const WtTitle = props => {
+  // TODO: accept variety of props with a default prop of date
+  const displayDate = getFriendlyDate(); // expects timestamp
+  const displayTime = getFriendlyTime(); // expects timestamp
+  return (
+    <div className="wtTitle">
+      <div className="wtTitleDate">{displayDate}</div>
+      <div className="wtTitleTime">{displayTime}</div>
+    </div>
+  );
+};
+
+const WtInputsInner = props => {
+  return (
+    <div className="wtInputsInnerWrap">
+      <div className="wtInputs">
+        <div className="wtInputWrap">
+          <WtInputItem
+            title="Weight"
+            type="weight"
+            units="LBS."
+            innerRef={props.weightRef}
+            value="186.8"
+          />
+          <WtInputItem
+            title="Body Fat"
+            type="bodyfat"
+            units="%."
+            innerRef={props.bodyFatRef}
+            value="18.3"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+const WtInputItem = props => {
+  return (
+    <div className={`wtInputItem ${props.type}`}>
+      <div className="wtInputTitle">{props.title}</div>
+      <div className="wtInputAndLabel">
+        <input
+          className={`wtInputInput ${props.type}`}
+          type="number"
+          ref={props.innerRef}
+          value={props.value}
+          onChange={() => {
+            console.log(this);
+          }}
+        />
+        <div className="wtInputUnits">{props.units}</div>
+      </div>
+    </div>
+  );
+};
+const WtDataHeaderLabel = props => (
+  <div className={props.className}>
+    {props.label} <span className="wtHeaderLabelUnits">({props.units})</span>
+  </div>
+);
+const wtRow = props => {};
+const wtWeekRow = props => {};
 
 const styles = {
   appWrap: {},

@@ -41,6 +41,21 @@ export const months = [
   "December",
 ];
 
+export const aMonths = [
+  "Jan.",
+  "Feb.",
+  "Mar.",
+  "Apr.",
+  "May",
+  "Jun.",
+  "Jul",
+  "Aug.",
+  "Sep.",
+  "Oct.",
+  "Nov.",
+  "Dec.",
+];
+
 export function getDow(dayIndex) {
   return DOW[dayIndex] || null;
 }
@@ -129,18 +144,33 @@ export function getTimestampFromTimeObj(dateKey, timeObj) {
   }
 }
 
-export function getFriendlyDate(timestamp) {
+export function getFriendlyDate(
+  timestamp = new Date().getTime(),
+  abbreviated = true,
+) {
   if (typeof timestamp === "string") {
     timestamp = parseInt(timestamp, 10);
   }
   const today = new Date(timestamp);
   const dow = getDow(today.getDay());
-  const month = months[today.getMonth()];
+  const month = abbreviated
+    ? aMonths[today.getMonth()]
+    : months[today.getMonth()];
   const date = today.getDate();
   return `${dow}, ${month} ${date}`;
 }
 
-export function getFriendlyTime(timestamp) {
+export function getMinMonDay(timestamp = new Date().getTime()) {
+  if (typeof timestamp === "string") {
+    timestamp = parseInt(timestamp, 10);
+  }
+  const today = new Date(timestamp);
+  const month = aMonths[today.getMonth()].replace(".", "");
+  const date = today.getDate();
+  return { month, date };
+}
+
+export function getFriendlyTime(timestamp = new Date().getTime()) {
   const date = new Date(timestamp);
   let hours = date.getHours();
   let minutes = date.getMinutes();
@@ -157,7 +187,13 @@ export function getFriendlyTime(timestamp) {
     hours = hours - 12;
   }
   if (hours === 0) hours = "12";
-  minutes = minutes === 0 ? "" : `:${minutes}`;
+  if (minutes === 0) {
+    minutes = "";
+  } else if (minutes < 10) {
+    minutes = `:0${minutes}`;
+  } else {
+    minutes = `:${minutes}`;
+  }
 
   return `${hours}${minutes}${ampm}`;
 }

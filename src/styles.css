@@ -1,12 +1,45 @@
 @import url("https://fonts.googleapis.com/css?family=Ubuntu:300,400,700");
+/*
+- dk purple - 1E243C
+- purple - 6054C2
+- green - 417505
+- red - D0021B
+- greyish - 7F98A3
+
+(dk to lt)
+- grad purple - 1E243C to 6054C2
+- grad green - 1F3802 to 417505
+- grad red - 440008 to D0021B
+
+- grey text - BABABA
+- black text - 242948
+- grey lines - ECECEC
+
+- Display - black: 900
+- Text - light: 200, medium: 500
+
+
+*/
 .appWrap {
   width: 100%;
   height: 100%;
-  background-image: url("../art/wt_layout_guide.png");
-  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: #242948;
+  font-family: "SF UI Text";
+  letter-spacing: -0.05em;
+  font-weight: 200;
+  font-size: 18px;
+  background: linear-gradient(180deg, #1e243c, #6054c2);
+  /* background-image: url(../art/wt_layout_guide.png); */
+  box-sizing: border-box;
+}
+.appWrap div {
+  box-sizing: inherit;
+}
+.wtTitle,
+.wtData {
 }
 .wtWrap {
   /* border: 1px solid red; */
@@ -15,25 +48,216 @@
   display: flex;
   flex-direction: column;
 }
-.wtTitle {
-  flex: 1 1 auto;
-  min-height: 15%;
-  border: 1px solid yellow;
-}
-.wtInput {
-  flex: 1 1 auto;
+.wtTitleRow {
   display: flex;
-  min-height: 16.5%;
-  border: 1px solid red;
+  height: 15%;
+  flex: 0 0 auto;
+  padding-left: 18px;
 }
-.wtData {
-  flex: 4 1 auto;
-  border: 1px solid green;
+.wtTitle {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.wtTitleDate {
+  font-family: "SF UI Display";
+  letter-spacing: 0;
+  font-weight: 900;
+  font-size: 26px;
+}
+.wtTitleTime {
+  margin-top: 5px;
+  font-size: 19px;
+}
+.wtInputRow {
+  height: 16.5%;
+  margin-bottom: 10px;
+}
+.wtInputsOuterWrap {
+  flex: 0 0 auto;
+  display: flex;
+  height: 100%;
+  justify-content: stretch;
+}
+.wtInputsInnerWrap {
+  padding: 15px 0px 15px 18px;
+  flex: 1;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  background: white;
+}
+.wtInputs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+}
+.wtInputWrap {
+  width: 100%;
+  display: flex;
+}
+.wtInputButton {
+  flex: 0 0 auto;
+  width: 60px;
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+  background: #7f98a3;
+  border-color: #7f98a3;
+  color: white;
+  font-size: 40px;
+}
+.wtInputItem {
+  margin-right: 20px;
+  position: relative;
+}
+.wtInputAndLabel {
+  display: flex;
+  align-items: baseline;
+}
+.wtInputItem.weight {
+  width: 60%;
+}
+.wtInputItem.bodyfat {
+  width: 40%;
+}
+.wtInputTitle {
+  color: #242948;
+  font-size: 18px;
+}
+.wtInputInput {
+  margin-top: 6px;
+  color: #242948;
+  padding: 0;
+  font-size: 40px;
+  margin-right: 6px;
+  letter-spacing: -0.07em;
+}
+.wtInputInput.weight {
+  max-width: 90px;
+}
+.wtInputInput.bodyfat {
+  max-width: 74px;
+}
+.wtInputUnits {
+  color: #bababa;
+  font-size: 16px;
+}
+.wtDataRow {
+  flex: 1;
   overflow: auto;
+  background: white;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+}
+.wtDataHeader {
+  flex: 0 0 auto;
+  padding: 18px 0px 10px 0px;
+  display: flex;
+}
+.wtHeaderLabelUnits {
+  font-weight: 500;
+  font-size: 16px;
+  color: #bababa;
+}
+.wtHeaderLabel.weight {
+  margin-left: 15%;
+  width: 45%;
+}
+.wtDataBody {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-top: 1px solid #ececec;
+  border-bottom: 1px solid #ececec;
+}
+.wtDayRow {
+  display: none;
+}
+.wtWeekRow {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #ececec;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+.wtRowDate {
+  width: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #bababa;
+  font-size: 16px;
+}
+.wtRowDateDate {
+  font-family: "SF UI Display";
+  letter-spacing: 0;
+  font-weight: 500;
+  text-align: center;
+  margin-top: -0.25em;
+}
+.wtRowData {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  font-size: 36px;
+  line-height: 36px;
+  letter-spacing: -0.07em;
+}
+.wtRowData.weight {
+  width: 25%;
+}
+.wtRowData.bodyfat {
+  width: 20%;
+}
+.wtRowChange {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-left: 21px;
+  font-size: 26px;
+  line-height: 26px;
+  padding-bottom: 2px;
+}
+.wtRowChange.wtDown {
+  background-image: url("../art/down@3x.png");
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: 0px 15px;
+  color: #417505;
+}
+.wtRowChange.wtUp {
+  background-image: url("../art/up@3x.png");
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: 0px 15px;
+  color: #d0021b;
+}
+.noData {
+  font-size: 13px;
+  color: #bababa;
+  letter-spacing: 0;
+}
+.noData.data {
+  margin-bottom: -3px;
+}
+.noData.change {
+  margin-left: -21px;
 }
 .wtFooter {
-  border: 1px solid purple;
   position: absolute;
   left: 0;
   bottom: 0;
+}
+.wtDataChart {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0px;
 }
