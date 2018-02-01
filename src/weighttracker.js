@@ -31,11 +31,6 @@ import {
   getMinMonDay,
 } from "./calendarDb";
 
-import "./styles.css";
-import chart from "../art/chart.png";
-
-// TODO: autoprefixer, create react app (CRA)
-
 export default class WeightTracker extends Component {
   constructor(props) {
     super(props);

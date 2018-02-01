@@ -1,15 +1,18 @@
 class CalendarDB {
+  /*
+    TODO: This entire class. The calendar is basic to several
+    apps I want to develop
+  */
   constructor(records = null, config = { allowGaps: false }) {
-    // bind all methods
+    // TODO: build and return an instance with the records and useful
+    // methods such as adding, removing, editing records
+    // and retrieving records for display or processing.
   }
   addRecord(dateKey = null) {
     // check if date exists
     // if exists, update existing
     // if ! allowGaps, check for last record and fill in gaps
   }
-  removeRecord(dateKey) {}
-  getRecords() {}
-  _getDateKey() {}
 }
 
 export const PREV = "prev";
