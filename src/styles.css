@@ -43,8 +43,8 @@
 }
 .wtWrap {
   /* border: 1px solid red; */
-  width: 90%;
-  height: 95%;
+  width: 95%;
+  height: 98.5%;
   display: flex;
   flex-direction: column;
 }
@@ -135,6 +135,13 @@
   font-size: 40px;
   margin-right: 6px;
   letter-spacing: -0.07em;
+  -webkit-appearance: none;
+  border: 0;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .wtInputInput.weight {
   max-width: 90px;

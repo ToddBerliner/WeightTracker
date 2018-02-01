@@ -53,7 +53,7 @@ const config = {
       template: path.join(paths.SRC, "index.html"),
     }),
     new FaviconsWebpackPlugin({
-      logo: path.join(paths.ART, "wticon.png"),
+      logo: path.join(paths.ART, "wticon_square.png"),
       icons: {
         android: false,
         appleIcon: true,

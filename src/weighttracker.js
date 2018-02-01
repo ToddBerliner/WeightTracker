@@ -160,15 +160,6 @@ export default class WeightTracker extends Component {
     );
   }
 
-  renderRow(dateKey, day) {
-    return (
-      <div key={dateKey} className="wtDayRow">
-        {getFriendlyDate(dateKey)}
-        -- Weight: {day.weight || "--"}lbs. -- Body Fat: {day.body_fat || "--"}%
-      </div>
-    );
-  }
-
   renderWeekRow(dateKey, data) {
     const { month, date } = getMinMonDay(dateKey.replace("w", ""), true);
     const {
@@ -233,8 +224,6 @@ export default class WeightTracker extends Component {
     dateKeys.forEach((dateKey, idx, arr) => {
       const dow = getDateFromKey(dateKey).getDay();
       const day = days[dateKey];
-      // add the day row
-      rows.push(this.renderRow(dateKey, day));
       // update the counters
       if (day.weight) {
         counters.dows.push(dow);
@@ -354,13 +343,6 @@ export default class WeightTracker extends Component {
             />
           </div>
           <div className="wtDataBody">{this.renderData()}</div>
-          <div className="wtDataChart">
-            <img src={chart} />
-          </div>
-        </div>
-        <div className="wtFooter" style={{ marginTop: 10 }}>
-          <button onClick={this.clearState}>Clear State</button>
-          <button onClick={this.addData}>Add Data</button>
         </div>
       </div>
     );
