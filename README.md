@@ -1,4 +1,5 @@
 # WeightTracker
+This is a simple weight tracking app written in React. Weight and body fat are accepted and every 7 days a new week is produced showing averages and the change in averages from the prior week. The current week is calculated as each day is entered and displayed at the top.
 
 # TODOs
 
