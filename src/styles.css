@@ -51,7 +51,11 @@
   display: flex;
   height: 15%;
   flex: 0 0 auto;
-  padding-left: 18px;
+  padding-left: 56px;
+  background-image: url("../art/wticon_circle.png");
+  background-repeat: no-repeat;
+  background-size: 47px;
+  background-position: 0% 50%;
 }
 .wtTitle {
   color: white;

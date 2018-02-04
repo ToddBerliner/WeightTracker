@@ -37,6 +37,10 @@ export default class WeightTracker extends Component {
     let state;
     try {
       state = JSON.parse(localStorage.getItem("state"));
+      if (!state.dateKeys.includes(getDateKey())) {
+        state.weight = 0;
+        state.bodyfat = 0;
+      }
     } catch (err) {
       state = null;
     }
@@ -55,16 +59,24 @@ export default class WeightTracker extends Component {
     this.addData = this.addData.bind(this);
     this.renderData = this.renderData.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
+    this.onInputFocus = this.onInputFocus.bind(this);
   }
 
   onInputChange(event) {
     const { value, name } = event.target;
+    console.log(value);
     this.setState(state => {
       return { ...state, [name]: value };
     });
   }
 
-  handleInput() {
+  onInputFocus(event) {
+    event.target.select();
+  }
+
+  handleInput(event) {
+    event.preventDefault();
+
     const dateTime = new Date();
     const dateKey = getDateKey(dateTime);
 
@@ -291,39 +303,43 @@ export default class WeightTracker extends Component {
         <div className="wtTitleRow">
           <WtTitle />
         </div>
-        <div className="wtInputRow">
-          <div className="wtInputsOuterWrap">
-            <div className="wtInputsInnerWrap">
-              <div className="wtInputs">
-                <div className="wtInputWrap">
-                  <WtInputItem
-                    title="Weight"
-                    type="weight"
-                    units="LBS."
-                    value={weight}
-                    name="weight"
-                    onInputChange={this.onInputChange}
-                  />
-                  <WtInputItem
-                    title="Body Fat"
-                    type="bodyfat"
-                    units="%."
-                    value={bodyfat}
-                    name="bodyfat"
-                    onInputChange={this.onInputChange}
-                  />
+        <form>
+          <div className="wtInputRow">
+            <div className="wtInputsOuterWrap">
+              <div className="wtInputsInnerWrap">
+                <div className="wtInputs">
+                  <div className="wtInputWrap">
+                    <WtInputItem
+                      title="Weight"
+                      type="weight"
+                      units="LBS."
+                      value={weight}
+                      name="weight"
+                      onInputChange={this.onInputChange}
+                      onInputFocus={this.onInputFocus}
+                    />
+                    <WtInputItem
+                      title="Body Fat"
+                      type="bodyfat"
+                      units="%."
+                      value={bodyfat}
+                      name="bodyfat"
+                      onInputChange={this.onInputChange}
+                      onInputFocus={this.onInputFocus}
+                    />
+                  </div>
                 </div>
               </div>
+              <button
+                className="wtInputButton"
+                type="submit"
+                onClick={this.handleInput}
+              >
+                +
+              </button>
             </div>
-            <button
-              className="wtInputButton"
-              type="button"
-              onClick={this.handleInput}
-            >
-              +
-            </button>
           </div>
-        </div>
+        </form>
         <div className="wtDataRow" ref="wtData">
           <div className="wtDataHeader">
             <WtDataHeaderLabel
@@ -368,6 +384,7 @@ const WtInputItem = props => {
           value={props.value}
           onChange={props.onInputChange}
           name={props.name}
+          onFocus={props.onInputFocus}
         />
         <div className="wtInputUnits">{props.units}</div>
       </div>
